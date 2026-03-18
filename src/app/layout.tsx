@@ -12,8 +12,9 @@ import { ZyraWidget } from '../components/zyra/ZyraWidget'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'BODLIZ STUDIO | High-Performance Web Studio',
-  description: 'Websites that breathe. Systems that work for you.',
+  title: 'BODLIZ STUDIO | Custom Website Creator & Izdelava Spletnih Strani',
+  description: 'Need a website? BODLIZ STUDIO specializes in creating high-performance websites worldwide. Rešite se počasnih predlog – vrhunsko ustvarjanje spletnih strani (Slovenija).',
+  keywords: ['bodliz studio', 'website creator', 'spletne strani', 'spletna stran', 'bodliz', 'ustvarjanje spletnih strani', 'spletne strani slovenija', 'creating website', 'websites', 'I need a website'],
   icons: {
     icon: '/slike/logo.png',
   },
