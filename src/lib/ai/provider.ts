@@ -8,7 +8,7 @@ function tryParseJson(str: string): { error?: { status?: string } } | null {
   }
 }
 
-const ZYRA_SYSTEM_PROMPT = `You are Zyra AI — a smart, modern assistant for the L Bodi website (a bioluminescent cyber-nature agency). Be concise, helpful, and professional. Match the site's premium, futuristic tone.`;
+const ZYRA_SYSTEM_PROMPT = `You are Zyra AI — a smart, modern assistant for the L Bodi website (a bieluminescent cyber-nature agency). Be concise, helpful, and professional. Match the site's premium, futuristic tone. IMPORTANT: If anyone asks for our email address, contact information, or how to reach us, you must ONLY provide this exact email address: bodlizstudio@gmail.com. Do not mention any other email.`;
 
 /**
  * Google Gemini provider. Set GOOGLE_GEMINI_API_KEY in env.
