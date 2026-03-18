@@ -65,7 +65,8 @@ export function MobileMenu() {
             animate="open"
             exit="closed"
             variants={menuVariants}
-            className="fixed inset-0 z-40 bg-black/80 backdrop-blur-xl flex flex-col justify-center items-center h-[100dvh] w-full"
+            className="fixed inset-0 z-40 bg-[#000000] flex flex-col justify-center items-center h-[100dvh] w-full"
+            style={{ backgroundColor: '#000000' }}
           >
             {/* Ambient Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-bioluminescence/10 rounded-full blur-[100px] pointer-events-none" />
