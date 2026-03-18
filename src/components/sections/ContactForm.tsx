@@ -32,6 +32,7 @@ export function ContactForm() {
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -51,6 +52,26 @@ export function ContactForm() {
     });
     return () => ctx.revert();
   }, []);
+
+  // Reactive success animation
+  useEffect(() => {
+    if (step === questions.length) {
+      // Animate the success box
+      gsap.fromTo(successRef.current,
+        { scale: 0.8, opacity: 0, y: 30 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.8, ease: "back.out(1.5)" }
+      );
+      
+      // Send a pulse to the background vine engine to react
+      window.dispatchEvent(new CustomEvent('vine-pulse', { detail: { intensity: 3.0 } }));
+      
+      // Animate the pinging ring
+      gsap.fromTo('.success-ring', 
+        { scale: 1, opacity: 1 }, 
+        { scale: 2.5, opacity: 0, duration: 1.5, repeat: -1, ease: "power2.out" }
+      );
+    }
+  }, [step, questions.length]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -110,8 +131,8 @@ export function ContactForm() {
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-bioluminescence/5 rounded-full blur-[100px] pointer-events-none" />
       
-      <div className="w-full max-w-4xl px-6 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
+      <div className="w-full max-w-4xl px-4 md:px-6 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
           
           {/* Info Side */}
           <div className="lg:col-span-2 space-y-8">
@@ -138,7 +159,7 @@ export function ContactForm() {
           </div>
 
           <div className="lg:col-span-3">
-            <div id="architecture-inquiry-box" className="glass-panel p-8 md:p-12 rounded-[2.5rem] relative overflow-hidden" style={{ boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.5)' }}>
+            <div id="architecture-inquiry-box" className="glass-panel p-6 md:p-12 rounded-[2rem] md:rounded-[2.5rem] relative overflow-hidden" style={{ boxShadow: '0 30px 60px -12px rgba(0, 0, 0, 0.5)' }}>
               <div className="mb-8 p-4 rounded-2xl bg-white/5 border border-white/10">
                 <p className="text-[10px] md:text-xs font-mono text-bioluminescence uppercase tracking-[0.2em] mb-2 font-bold opacity-80">Engineering Brief:</p>
                 <p className="text-slate-400 text-sm font-light leading-relaxed">
@@ -267,9 +288,13 @@ export function ContactForm() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 space-y-6">
-                  <div className="w-20 h-20 rounded-full bg-bioluminescence/10 border border-bioluminescence/20 flex items-center justify-center mx-auto mb-8">
-                     <div className="w-4 h-4 rounded-full bg-bioluminescence animate-ping" />
+                <div ref={successRef} className="text-center py-8 md:py-12 space-y-6">
+                  <div className="relative w-20 h-20 mx-auto mb-8">
+                    <div className="absolute inset-0 rounded-full bg-bioluminescence/10 border border-bioluminescence/20 flex items-center justify-center">
+                       <div className="w-4 h-4 rounded-full bg-bioluminescence" />
+                    </div>
+                    {/* The expanding reactive ring */}
+                    <div className="success-ring absolute inset-0 rounded-full border border-bioluminescence/50" />
                   </div>
                   <h3 className="text-3xl md:text-4xl font-bold text-white">{t.successTitle}</h3>
                   <p className="text-slate-400 max-w-sm mx-auto font-light leading-relaxed">

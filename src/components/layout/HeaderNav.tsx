@@ -3,19 +3,22 @@
 import Link from 'next/link';
 import { useLocale } from '../../context/LocaleContext';
 import { translations } from '../../lib/translations';
+import { MobileMenu } from './MobileMenu'; // Ločena koda za mobilni meni
 
 export function HeaderNav() {
   const { locale, setLocale } = useLocale();
   const t = translations[locale].nav;
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center mix-blend-difference">
-      <Link href="/" className="flex items-center gap-3 group">
-        <img src="/slike/logo.png" alt="BODLIZ STUDIO Logo" className="w-10 h-10 object-contain transition-transform duration-500 group-hover:scale-110" />
-        <div className="text-xl font-bold tracking-tighter text-white uppercase">
+    <nav className="fixed top-0 left-0 w-full z-50 px-6 py-4 md:px-8 md:py-6 flex justify-between items-center mix-blend-difference">
+      <Link href="/" className="flex items-center gap-3 group relative z-50">
+        <img src="/slike/logo.png" alt="BODLIZ STUDIO Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain transition-transform duration-500 group-hover:scale-110" />
+        <div className="text-lg md:text-xl font-bold tracking-tighter text-white uppercase mt-1">
           BODLIZ STUDIO<span className="text-bioluminescence">.</span>
         </div>
       </Link>
+      
+      {/* Namizni vmesnik (Skrit na telefonu) */}
       <div className="hidden md:flex items-center gap-8 text-xs font-semibold tracking-widest uppercase text-white/70">
         <Link href="/#services" className="hover:text-bioluminescence transition-colors">{t.services}</Link>
         <Link href="/projects" className="hover:text-bioluminescence transition-colors">{t.myProjects}</Link>
@@ -49,6 +52,9 @@ export function HeaderNav() {
           SLO
         </button>
       </div>
+
+      {/* Mobilni vmesnik (ločena komponenta) */}
+      <MobileMenu />
     </nav>
   );
 }
