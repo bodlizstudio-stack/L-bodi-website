@@ -120,10 +120,13 @@ export function Footer() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-white/5 rounded-full blur-[120px] pointer-events-none transition-all duration-1000" />
             
             <button 
-              onClick={closeEasterEgg}
+              onClick={() => {
+                closeEasterEgg();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
               className="absolute top-8 right-8 text-white/50 hover:text-white text-xs font-mono uppercase tracking-widest z-[110] transition-colors"
             >
-              [ Close ]
+              [ Back to Home ]
             </button>
 
             {eggPhase === 'text' && (
