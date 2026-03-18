@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/slike/logo.png',
   },
+  verification: {
+    google: '2k8ci7Wr5NOJu1bD4VL3Et1LMRvfTYl5kctNb6OnsVE',
+  },
 }
 
 export default function RootLayout({
