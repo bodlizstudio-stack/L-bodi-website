@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: l-bodi-website
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: GOOGLE_GEMINI_API_KEY
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
