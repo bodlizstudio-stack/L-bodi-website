@@ -44,7 +44,14 @@ window.scissorTransition = function(targetUrl) {
 
 // Intercept all internal links on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
-    const internalPages = ['index.html', 'index.php', 'configurator.php', 'admin.php', 'configurator_mobile.php', 'checkout.php', 'contact.php'];
+    const internalPages = [
+        'index.html', 'index.php',
+        'configurator.html', 'configurator.php',
+        'configurator_mobile.html', 'configurator_mobile.php',
+        'admin.html', 'admin.php',
+        'checkout.html', 'checkout.php',
+        'contact.html', 'contact.php',
+    ];
     
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
@@ -62,8 +69,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    
+async function portfolioLoadProductGridIfNeeded() {
+    const grid = document.getElementById('product-grid');
+    if (!grid || grid.getAttribute('data-dynamic') !== 'true') return;
+    try {
+        let products;
+        const stored = localStorage.getItem('portfolioProductsCatalog');
+        if (stored) {
+            products = JSON.parse(stored);
+        } else {
+            const r = await fetch('products.json');
+            products = await r.json();
+        }
+        if (!Array.isArray(products) || !products.length) return;
+        grid.innerHTML = products.map((p) => {
+            const img = (p.image || '').replace(/"/g, '&quot;');
+            const title = String(p.title || '').replace(/</g, '&lt;');
+            const desc = String(p.description || '').replace(/</g, '&lt;');
+            const price = String(p.price || '0');
+            return `<article class="product-card">
+                <img src="${img}" alt="${title}" class="product-img">
+                <div class="product-info">
+                    <h3 class="product-title">${title}</h3>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem;">${desc}</p>
+                    <p class="product-price">$ ${price}</p>
+                    <button type="button" class="btn btn-secondary add-to-cart-btn">Add to Cart</button>
+                </div>
+            </article>`;
+        }).join('');
+    } catch (e) {
+        console.warn('portfolio product grid', e);
+        if (grid) grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;">Could not load products.</p>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await portfolioLoadProductGridIfNeeded();
+
     // --- 1. CART SYSTEM (localStorage) ---
     const cart = {
         items: JSON.parse(localStorage.getItem('portfolioCart') || '[]'),
@@ -159,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>TOTAL</span>
                     <span class="cart-total-value">$0.00</span>
                 </div>
-                <a href="checkout.php" class="cart-checkout-btn">PROCEED TO CHECKOUT →</a>
+                <a href="checkout.html" class="cart-checkout-btn">PROCEED TO CHECKOUT →</a>
             </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', drawerHTML);
@@ -177,32 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init badge count on page load
     cart.updateBadge();
     
-    // Wire Add-to-Cart buttons on product cards (index.php)
-    const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
-    addToCartBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const card = btn.closest('.product-card') || btn.closest('article');
-            if (card) {
-                const title = card.querySelector('.product-title')?.innerText || 'Custom Design';
-                const priceText = card.querySelector('.product-price')?.innerText || '45.00';
-                const price = priceText.replace(/[^0-9.]/g, '');
-                const image = card.querySelector('.product-img')?.src || '';
-                cart.add({ title, price, image });
-            }
-            // Button feedback
-            const origText = btn.innerText;
-            btn.innerText = 'ADDED ✓';
-            btn.style.backgroundColor = 'var(--accent-3)';
-            setTimeout(() => { btn.innerText = origText; btn.style.backgroundColor = ''; }, 1200);
-        });
-    });
-    
-    // Wire Add-to-Cart on configurator (right sidebar)
-    const configCartBtn = document.getElementById('add-to-cart-config');
-    if (configCartBtn) {
-        configCartBtn.addEventListener('click', (e) => {
-            e.preventDefault();
+    // Add-to-cart: delegation (works for dynamically injected product cards)
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.add-to-cart-btn');
+        if (!btn) return;
+        e.preventDefault();
+        if (btn.id === 'add-to-cart-config') {
             const activeColor = document.querySelector('.color-btn.active');
             const activeSize = document.querySelector('.size-btn.active');
             cart.add({
@@ -212,11 +234,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 size: activeSize?.innerText || 'M',
                 color: activeColor?.dataset.hex || '#ffffff'
             });
-            configCartBtn.innerText = 'ADDED ✓';
-            configCartBtn.style.backgroundColor = 'var(--accent-3)';
-            setTimeout(() => { configCartBtn.innerText = 'ADD TO CART'; configCartBtn.style.backgroundColor = ''; }, 1200);
-        });
-    }
+            btn.innerText = 'ADDED ✓';
+            btn.style.backgroundColor = 'var(--accent-3)';
+            setTimeout(() => { btn.innerText = 'ADD TO CART'; btn.style.backgroundColor = ''; }, 1200);
+            return;
+        }
+        const card = btn.closest('.product-card') || btn.closest('article');
+        if (card) {
+            const title = card.querySelector('.product-title')?.innerText || 'Custom Design';
+            const priceText = card.querySelector('.product-price')?.innerText || '45.00';
+            const price = priceText.replace(/[^0-9.]/g, '');
+            const image = card.querySelector('.product-img')?.src || '';
+            cart.add({ title, price, image });
+            const origText = btn.innerText;
+            btn.innerText = 'ADDED ✓';
+            btn.style.backgroundColor = 'var(--accent-3)';
+            setTimeout(() => { btn.innerText = origText; btn.style.backgroundColor = ''; }, 1200);
+            return;
+        }
+        if (document.querySelector('.mobile-3d-stage') && btn.classList.contains('add-to-cart-btn')) {
+            const activeColor = document.querySelector('.color-btn.active');
+            const activeSize = document.querySelector('.size-btn.active');
+            cart.add({
+                title: 'Custom 3D Design',
+                price: '45.00',
+                image: 'assets/img/product_1.png',
+                size: activeSize?.innerText || 'M',
+                color: activeColor?.dataset.hex || '#ffffff'
+            });
+            btn.innerText = 'ADDED ✓';
+            btn.style.backgroundColor = 'var(--accent-3)';
+            setTimeout(() => { btn.innerText = 'ADD TO CART'; btn.style.backgroundColor = ''; }, 1200);
+        }
+    });
     
     // Expose cart globally for checkout page
     window.portfolioCart = cart;
