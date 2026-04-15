@@ -44,7 +44,7 @@ window.scissorTransition = function(targetUrl) {
 
 // Intercept all internal links on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
-    const internalPages = ['index.php', 'configurator.php', 'admin.php', 'configurator_mobile.php', 'checkout.php', 'contact.php'];
+    const internalPages = ['index.html', 'index.php', 'configurator.php', 'admin.php', 'configurator_mobile.php', 'checkout.php', 'contact.php'];
     
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');

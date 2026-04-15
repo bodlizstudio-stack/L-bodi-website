@@ -1,7 +1,7 @@
 /** Zunanji portfelji, servirani iz /public — dodaj nove vnose tukaj. */
 export const PORTFOLIO_LINKS = [
   {
-    href: '/portfolij-nelti/index.php',
+    href: '/portfolij-nelti/index.html',
     labelKey: 'portfolioNelti' as const,
   },
   {

@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className="dark">
       <body className={`${inter.className} bg-obsidian text-white selection:bg-bioluminescence/30`}>
         <SmoothScrollProvider>
           <LocaleProvider>
