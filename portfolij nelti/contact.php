@@ -69,10 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_contact'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Contact - Portfolio Sample</title>
     <meta name="description" content="Get in touch with us. Portfolio Sample showcase.">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/mobile.css" media="(max-width: 768px)">
 </head>
 <body>
 
@@ -81,16 +82,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_contact'])) {
 <header>
     <div class="nav-container">
         <a href="index.php" class="logo" style="font-weight:900; font-size:1.5rem; text-decoration:none; color:var(--text-color); background:var(--accent-1); padding:0.3rem 0.8rem; border:var(--border-width) solid var(--border-color); box-shadow:4px 4px 0px var(--border-color);">PORTFOLIO SAMPLE</a>
-        <nav>
+        <nav id="site-nav" class="site-nav">
             <ul>
                 <li><a href="configurator.php">DESIGN</a></li>
                 <li><a href="index.php">SHOP</a></li>
                 <li><a href="contact.php" style="color: var(--accent-2);">CONTACT</a></li>
             </ul>
         </nav>
-        <div class="cart-icon">
-            <span style="font-size: 2rem;">🛒</span>
-            <span class="cart-badge" id="cart-badge">0</span>
+        <div class="nav-actions">
+            <div class="cart-icon">
+                <span style="font-size: 2rem;">🛒</span>
+                <span class="cart-badge" id="cart-badge">0</span>
+            </div>
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Odpri meni">
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+            </button>
         </div>
     </div>
 </header>
@@ -134,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_contact'])) {
     <?php else: ?>
     
     <!-- CONTACT FORM SECTION -->
-    <section style="min-height: calc(100vh - 80px); display: grid; grid-template-columns: 1fr 1fr;">
+    <section class="contact-page-layout" style="min-height: calc(100vh - 80px); display: grid; grid-template-columns: 1fr 1fr;">
         
         <!-- LEFT: Creative visual -->
         <div style="background: var(--text-color); display: flex; align-items: center; justify-content: center; padding: 4rem; border-right: var(--border-width) solid var(--border-color); position: relative; overflow: hidden;">
@@ -175,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_contact'])) {
             
             <form method="POST" action="contact.php" enctype="multipart/form-data" id="contact-form">
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label for="contact-name">NAME *</label>
                         <input type="text" id="contact-name" name="name" class="form-input" placeholder="Your name" required>
@@ -228,6 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_contact'])) {
 
 <div id="toast-container"></div>
 <script src="app.js"></script>
+<script src="assets/js/mobile-nav.js" defer></script>
 
 <style>
 /* Floating envelope animation */

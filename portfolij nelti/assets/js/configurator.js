@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const STORAGE_KEY = 'nelti_studio_desktop_v1_';
+    let persistPaused = false;
+    let persistTimer = null;
+    let saveState = function () {};
+    let schedulePersist = function () {};
+
     // --- FABRIC.JS 2D MINIMAP ENGINE (DUAL FRONT/BACK) ---
     const canvasFrontEl = document.getElementById('design-minimap-front');
     const canvasBackEl = document.getElementById('design-minimap-back');
@@ -9,6 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let fCanvasFront, fCanvasBack;
     let decalTextureFront, decalTextureBack;
     let activeCanvas = null; // Pointer to whichever array we are editing
+    let refreshTextLayerColorsUI = function () {};
+
+    /** GLTF meshes often use material[] — push each slot so shirt color updates work. */
+    function pushMeshMaterials(mesh, arr) {
+        if (!mesh.material) return;
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        mats.forEach((m) => {
+            if (m && m.color) arr.push(m);
+        });
+    }
 
     function setupFabric(id) {
         const f = new fabric.Canvas(id);
@@ -33,6 +49,85 @@ document.addEventListener('DOMContentLoaded', () => {
         decalTextureBack = backParams.tex;
 
         activeCanvas = fCanvasFront; // Default
+
+        const textLayersColorsEl = document.getElementById('text-layers-colors');
+
+        function fabricFillToHex(fill) {
+            try {
+                return '#' + new fabric.Color(fill).toHex();
+            } catch (e) {
+                return '#121212';
+            }
+        }
+
+        refreshTextLayerColorsUI = function () {
+            if (!textLayersColorsEl || !activeCanvas) return;
+            const layers = activeCanvas.getObjects().filter((o) => o.type === 'i-text');
+            textLayersColorsEl.innerHTML = '';
+            if (layers.length === 0) {
+                const p = document.createElement('p');
+                p.style.cssText = 'font-size:0.8rem;color:#777;margin:0;';
+                p.textContent = 'Add a text layer to set color.';
+                textLayersColorsEl.appendChild(p);
+                return;
+            }
+            layers.forEach((obj, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;';
+                const label = document.createElement('span');
+                label.style.cssText = 'font-weight:bold;font-size:0.85rem;min-width:5rem;';
+                label.textContent = 'Text ' + (idx + 1);
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.value = fabricFillToHex(obj.fill);
+                input.style.cssText = 'width:44px;height:40px;border:2px solid var(--border-color);cursor:pointer;padding:0;';
+                input.setAttribute('aria-label', 'Color for text layer ' + (idx + 1));
+                input.addEventListener('input', () => {
+                    obj.set('fill', input.value);
+                    obj.setCoords();
+                    activeCanvas.requestRenderAll();
+                });
+                row.appendChild(label);
+                row.appendChild(input);
+                textLayersColorsEl.appendChild(row);
+            });
+        };
+
+        saveState = function () {
+            if (persistPaused || !fCanvasFront || !fCanvasBack) return;
+            try {
+                localStorage.setItem(STORAGE_KEY + 'fabric_front', JSON.stringify(fCanvasFront.toJSON()));
+                localStorage.setItem(STORAGE_KEY + 'fabric_back', JSON.stringify(fCanvasBack.toJSON()));
+                const activeHex = document.querySelector('.color-btn.active')?.dataset?.hex;
+                if (activeHex) localStorage.setItem(STORAGE_KEY + 'shirt_hex', activeHex);
+                const activeSize = document.querySelector('.size-btn.active')?.dataset?.size;
+                if (activeSize) localStorage.setItem(STORAGE_KEY + 'size', activeSize);
+                localStorage.setItem(STORAGE_KEY + 'side', activeCanvas === fCanvasFront ? 'front' : 'back');
+            } catch (e) {
+                console.warn('Nelti save', e);
+            }
+        };
+
+        schedulePersist = function () {
+            if (persistPaused) return;
+            clearTimeout(persistTimer);
+            persistTimer = setTimeout(saveState, 400);
+        };
+
+        [fCanvasFront, fCanvasBack].forEach((c) => {
+            ['object:added', 'object:removed', 'object:modified'].forEach((ev) => {
+                c.on(ev, () => {
+                    refreshTextLayerColorsUI();
+                    schedulePersist();
+                });
+            });
+        });
+        refreshTextLayerColorsUI();
+
+        window.addEventListener('beforeunload', () => {
+            persistPaused = false;
+            saveState();
+        });
     }
 
     // --- LEFT BAR UI CONTROLS BINDING ---
@@ -158,6 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapperFront.style.display = 'block';
             wrapperBack.style.display = 'none';
             activeCanvas = fCanvasFront;
+            refreshTextLayerColorsUI();
+            schedulePersist();
             
             // Camera Pan
             if(camera && controls) {
@@ -174,6 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapperBack.style.display = 'block';
             wrapperFront.style.display = 'none';
             activeCanvas = fCanvasBack;
+            refreshTextLayerColorsUI();
+            schedulePersist();
             
             // Camera Pan
             if(camera && controls) {
@@ -188,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- THREE.JS ENGINE SETUP ---
     const container = document.getElementById('webgl-container');
     const loaderMsg = document.getElementById('loader-msg');
+    const loaderOverlay = document.getElementById('nelti-loader');
     
     // Core components
     let scene, camera, renderer, controls, tshirtModel;
@@ -251,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (node.isMesh) {
                         node.castShadow = true;
                         node.receiveShadow = true;
-                        if (node.material) materialReferences.push(node.material);
+                        pushMeshMaterials(node, materialReferences);
                     }
                 });
 
@@ -326,8 +426,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 controls.target.set(0, 0, 0);
                 controls.update();
-                
-                loaderMsg.style.display = 'none';
+
+                const shirtHex = localStorage.getItem(STORAGE_KEY + 'shirt_hex') || document.querySelector('.color-btn.active')?.dataset?.hex;
+                if (shirtHex && materialReferences.length) {
+                    materialReferences.forEach((mat) => {
+                        if (mat && mat.color) {
+                            mat.color.set(shirtHex);
+                            mat.needsUpdate = true;
+                        }
+                    });
+                }
+
+                if (loaderMsg) loaderMsg.style.display = 'none';
+                if (loaderOverlay) loaderOverlay.style.display = 'none';
+                requestAnimationFrame(() => {
+                    onWindowResize();
+                    setTimeout(onWindowResize, 100);
+                });
             },
             function (xhr) {
                 if (xhr.lengthComputable) {
@@ -370,21 +485,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- COLOR CONFIGURATOR LOGIC ---
+    function getLuminance(hex) {
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return 1;
+        const h = hex.length >= 7 ? hex.slice(0, 7) : hex;
+        const r = parseInt(h.slice(1, 3), 16);
+        const g = parseInt(h.slice(3, 5), 16);
+        const b = parseInt(h.slice(5, 7), 16);
+        if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return 1;
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+
+    /** Svetla majica → črno ozadje; temna majica → belo ozadje (kontrast). */
+    function updateBgContrast(hex) {
+        if (!scene || !renderer) return;
+        const lum = getLuminance(hex);
+        const bgHex = lum > 0.6 ? '#000000' : '#ffffff';
+        scene.background = new THREE.Color(bgHex);
+        renderer.setClearColor(bgHex);
+        if (container) container.style.backgroundColor = bgHex;
+    }
+
+    function restorePersistedState() {
+        if (!fCanvasFront || !fCanvasBack) return;
+        persistPaused = true;
+        const frontRaw = localStorage.getItem(STORAGE_KEY + 'fabric_front');
+        const backRaw = localStorage.getItem(STORAGE_KEY + 'fabric_back');
+
+        const restoreOptions = () => {
+            const storedHex = localStorage.getItem(STORAGE_KEY + 'shirt_hex');
+            if (storedHex) {
+                document.querySelectorAll('.color-btn').forEach((b) => {
+                    b.classList.toggle('active', b.dataset.hex === storedHex);
+                });
+            }
+            const storedSize = localStorage.getItem(STORAGE_KEY + 'size');
+            if (storedSize) {
+                document.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
+                const sz = Array.from(document.querySelectorAll('.size-btn')).find((b) => b.dataset.size === storedSize);
+                if (sz) sz.classList.add('active');
+            }
+            const side = localStorage.getItem(STORAGE_KEY + 'side');
+            if (side === 'back' && btnFront && btnBack && wrapperFront && wrapperBack) {
+                btnBack.style.background = 'var(--accent-3)';
+                btnFront.style.background = '#fff';
+                wrapperBack.style.display = 'block';
+                wrapperFront.style.display = 'none';
+                activeCanvas = fCanvasBack;
+                if (camera && controls) {
+                    camera.position.set(0, 0, -2.5);
+                    controls.update();
+                }
+            }
+            refreshTextLayerColorsUI();
+            const hx = document.querySelector('.color-btn.active')?.dataset?.hex || '#ffffff';
+            updateBgContrast(hx);
+            persistPaused = false;
+        };
+
+        if (!frontRaw && !backRaw) {
+            restoreOptions();
+            return;
+        }
+        let pending = 0;
+        const done = () => {
+            pending--;
+            if (pending <= 0) restoreOptions();
+        };
+        try {
+            if (frontRaw) {
+                pending++;
+                fCanvasFront.loadFromJSON(frontRaw, () => {
+                    fCanvasFront.renderAll();
+                    done();
+                });
+            }
+            if (backRaw) {
+                pending++;
+                fCanvasBack.loadFromJSON(backRaw, () => {
+                    fCanvasBack.renderAll();
+                    done();
+                });
+            }
+            if (pending === 0) restoreOptions();
+        } catch (e) {
+            persistPaused = false;
+            console.warn('Nelti restore', e);
+        }
+    }
+
+    restorePersistedState();
+
     const colorBtns = document.querySelectorAll('.color-btn');
 
     if (colorBtns) {
         colorBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                colorBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
                 const hexColor = btn.dataset.hex;
+                document.querySelectorAll('.color-btn').forEach((b) => {
+                    b.classList.toggle('active', b.dataset.hex === hexColor);
+                });
+
                 if (materialReferences.length > 0 && hexColor) {
                     materialReferences.forEach(mat => {
-                        mat.color.set(hexColor);
-                        mat.needsUpdate = true;
+                        if (mat && mat.color) {
+                            mat.color.set(hexColor);
+                            mat.needsUpdate = true;
+                        }
                     });
                 }
+                if (hexColor) updateBgContrast(hexColor);
+                schedulePersist();
             });
         });
     }
@@ -396,6 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 sizeBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                schedulePersist();
             });
         });
     }

@@ -42,70 +42,19 @@ window.scissorTransition = function(targetUrl) {
     }, 3000);
 };
 
-// Intercept all internal links on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-    const internalPages = [
-        'index.html', 'index.php',
-        'configurator.html', 'configurator.php',
-        'configurator_mobile.html', 'configurator_mobile.php',
-        'admin.html', 'admin.php',
-        'checkout.html', 'checkout.php',
-        'contact.html', 'contact.php',
-    ];
-    
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (!link) return;
-        
-        const href = link.getAttribute('href');
-        if (!href) return;
-        
-        // Check if this is an internal page link
-        const isInternal = internalPages.some(page => href.includes(page));
-        if (isInternal) {
-            e.preventDefault();
-            window.scissorTransition(href);
-        }
-    });
+// Internal page links use normal browser navigation (reliable with `npm start` on http://localhost).
+// Optional: add class "scissor-link" on an <a> to use the dramatic transition.
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a.scissor-link');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#')) return;
+    e.preventDefault();
+    window.scissorTransition(href);
 });
 
-async function portfolioLoadProductGridIfNeeded() {
-    const grid = document.getElementById('product-grid');
-    if (!grid || grid.getAttribute('data-dynamic') !== 'true') return;
-    try {
-        let products;
-        const stored = localStorage.getItem('portfolioProductsCatalog');
-        if (stored) {
-            products = JSON.parse(stored);
-        } else {
-            const r = await fetch('products.json');
-            products = await r.json();
-        }
-        if (!Array.isArray(products) || !products.length) return;
-        grid.innerHTML = products.map((p) => {
-            const img = (p.image || '').replace(/"/g, '&quot;');
-            const title = String(p.title || '').replace(/</g, '&lt;');
-            const desc = String(p.description || '').replace(/</g, '&lt;');
-            const price = String(p.price || '0');
-            return `<article class="product-card">
-                <img src="${img}" alt="${title}" class="product-img">
-                <div class="product-info">
-                    <h3 class="product-title">${title}</h3>
-                    <p style="margin-bottom: 1rem; font-size: 0.9rem;">${desc}</p>
-                    <p class="product-price">$ ${price}</p>
-                    <button type="button" class="btn btn-secondary add-to-cart-btn">Add to Cart</button>
-                </div>
-            </article>`;
-        }).join('');
-    } catch (e) {
-        console.warn('portfolio product grid', e);
-        if (grid) grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:2rem;">Could not load products.</p>';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    await portfolioLoadProductGridIfNeeded();
-
+document.addEventListener('DOMContentLoaded', () => {
+    
     // --- 1. CART SYSTEM (localStorage) ---
     const cart = {
         items: JSON.parse(localStorage.getItem('portfolioCart') || '[]'),
@@ -219,26 +168,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Init badge count on page load
     cart.updateBadge();
     
-    // Add-to-cart: delegation (works for dynamically injected product cards)
-    document.addEventListener('click', (e) => {
+    // Wire Add-to-Cart on product cards (including items loaded after DOM via /api/products)
+    document.body.addEventListener('click', (e) => {
         const btn = e.target.closest('.add-to-cart-btn');
         if (!btn) return;
         e.preventDefault();
-        if (btn.id === 'add-to-cart-config') {
-            const activeColor = document.querySelector('.color-btn.active');
-            const activeSize = document.querySelector('.size-btn.active');
-            cart.add({
-                title: 'Custom 3D Design',
-                price: '45.00',
-                image: 'assets/img/product_1.png',
-                size: activeSize?.innerText || 'M',
-                color: activeColor?.dataset.hex || '#ffffff'
-            });
-            btn.innerText = 'ADDED ✓';
-            btn.style.backgroundColor = 'var(--accent-3)';
-            setTimeout(() => { btn.innerText = 'ADD TO CART'; btn.style.backgroundColor = ''; }, 1200);
-            return;
-        }
         const card = btn.closest('.product-card') || btn.closest('article');
         if (card) {
             const title = card.querySelector('.product-title')?.innerText || 'Custom Design';
@@ -246,13 +180,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             const price = priceText.replace(/[^0-9.]/g, '');
             const image = card.querySelector('.product-img')?.src || '';
             cart.add({ title, price, image });
-            const origText = btn.innerText;
-            btn.innerText = 'ADDED ✓';
-            btn.style.backgroundColor = 'var(--accent-3)';
-            setTimeout(() => { btn.innerText = origText; btn.style.backgroundColor = ''; }, 1200);
-            return;
+        } else if (btn.closest('.mobile-layout') && btn.classList.contains('add-to-cart-btn')) {
+            const activeColor = document.querySelector('.mobile-layout .color-btn.active');
+            const activeSize = document.querySelector('.mobile-layout .size-btn.active');
+            cart.add({
+                title: 'Custom 3D Design',
+                price: '45.00',
+                image: 'assets/img/product_1.png',
+                size: activeSize?.innerText || 'M',
+                color: activeColor?.dataset?.hex || '#ffffff'
+            });
         }
-        if (document.querySelector('.mobile-3d-stage') && btn.classList.contains('add-to-cart-btn')) {
+        const origText = btn.innerText;
+        btn.innerText = 'ADDED ✓';
+        btn.style.backgroundColor = 'var(--accent-3)';
+        setTimeout(() => { btn.innerText = origText; btn.style.backgroundColor = ''; }, 1200);
+    });
+    
+    // Wire Add-to-Cart on configurator (right sidebar)
+    const configCartBtn = document.getElementById('add-to-cart-config');
+    if (configCartBtn) {
+        configCartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const activeColor = document.querySelector('.color-btn.active');
             const activeSize = document.querySelector('.size-btn.active');
             cart.add({
@@ -262,11 +211,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 size: activeSize?.innerText || 'M',
                 color: activeColor?.dataset.hex || '#ffffff'
             });
-            btn.innerText = 'ADDED ✓';
-            btn.style.backgroundColor = 'var(--accent-3)';
-            setTimeout(() => { btn.innerText = 'ADD TO CART'; btn.style.backgroundColor = ''; }, 1200);
-        }
-    });
+            configCartBtn.innerText = 'ADDED ✓';
+            configCartBtn.style.backgroundColor = 'var(--accent-3)';
+            setTimeout(() => { configCartBtn.innerText = 'ADD TO CART'; configCartBtn.style.backgroundColor = ''; }, 1200);
+        });
+    }
     
     // Expose cart globally for checkout page
     window.portfolioCart = cart;
@@ -338,9 +287,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('mouseup', () => { isDragging = false; isResizing = false; });
     }
 
-    // --- 4. FABRIC.JS 2D MINIMAP ENGINE ---
+    // --- 4. FABRIC.JS 2D MINIMAP ENGINE (skip if dedicated configurator script runs — avoids double Three/Fabric init) ---
     const canvasFrontEl = document.getElementById('design-minimap-front');
-    if (canvasFrontEl && typeof fabric !== 'undefined') {
+    const usesDedicatedConfigurator = Array.from(document.scripts).some((s) => {
+        const src = s.getAttribute('src') || '';
+        return src.includes('configurator.js') || src.includes('configurator_mobile.js');
+    });
+    if (canvasFrontEl && typeof fabric !== 'undefined' && !usesDedicatedConfigurator) {
         let fCanvasFront, fCanvasBack;
         let decalTextureFront, decalTextureBack;
         let activeCanvas = null;
@@ -519,10 +472,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 const loader = new THREE.GLTFLoader();
+                const pushMeshMaterials = (mesh, arr) => {
+                    if (!mesh.material) return;
+                    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                    mats.forEach((m) => {
+                        if (m && m.color) arr.push(m);
+                    });
+                };
+
                 loader.load('assets/model/t_shirt.glb', (gltf) => {
                     tshirtModel = gltf.scene;
                     tshirtModel.traverse(node => {
-                        if (node.isMesh && node.material) materialRefs.push(node.material);
+                        if (node.isMesh) pushMeshMaterials(node, materialRefs);
                     });
                     
                     // --- CENTERING MATH ---
@@ -628,7 +589,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Update model color if loaded
                     if (materialRefs.length) {
-                        materialRefs.forEach(m => { m.color.set(hex); m.needsUpdate = true; });
+                        materialRefs.forEach(m => {
+                            if (m && m.color) {
+                                m.color.set(hex);
+                                m.needsUpdate = true;
+                            }
+                        });
                     }
                     
                     // --- DYNAMIC BACKGROUND CONTRAST ---

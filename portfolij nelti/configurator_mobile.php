@@ -5,7 +5,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>3D Design Studio - Mobile</title>
     
     <!-- Fonts -->
@@ -19,6 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/mobile.css" media="(max-width: 768px)">
     <style>
         body { overflow-x: hidden; background-color: #FAFAFA; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh;}
         header { position: sticky; top: 0; z-index: 1000; }
@@ -69,9 +70,22 @@
 <header>
     <div class="nav-container" style="max-width: 100%; padding: 0.5rem 1rem;">
         <a href="index.php" class="logo"><img src="slike/logo.png" alt="NeLTi Logo"></a>
-        <div class="cart-icon">
-            <span style="font-size: 1.5rem;">🛒</span>
-            <span class="cart-badge" id="cart-badge">0</span>
+        <nav id="site-nav" class="site-nav">
+            <ul>
+                <li><a href="index.php">SHOP</a></li>
+                <li><a href="contact.php">CONTACT</a></li>
+            </ul>
+        </nav>
+        <div class="nav-actions">
+            <div class="cart-icon">
+                <span style="font-size: 1.5rem;">🛒</span>
+                <span class="cart-badge" id="cart-badge">0</span>
+            </div>
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Odpri meni">
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+            </button>
         </div>
     </div>
 </header>
@@ -79,7 +93,7 @@
 <main class="mobile-layout">
     <!-- 3D Viewport -->
     <div class="mobile-3d-stage" id="webgl-container">
-        <div id="loader-msg" style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index: 10; font-size: 1rem; font-weight: bold; animation: blink 1s infinite;">
+        <div id="loader-msg" style="position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); z-index: 100; font-size: 1rem; font-weight: bold; animation: blink 1s infinite;">
             LOADING 3D...
         </div>
     </div>
@@ -123,6 +137,10 @@
             <option value="Playfair Display">Playfair</option>
             <option value="Bebas Neue">Bebas Neue</option>
         </select>
+
+        <label style="display: block; font-weight: bold; margin: 0.75rem 0 0.35rem 0; font-size: 0.9rem;">Text color (each layer)</label>
+        <p style="font-size: 0.7rem; color: #666; margin: 0 0 0.5rem 0;">One color control per text layer.</p>
+        <div id="text-layers-colors" style="display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem;"></div>
         
         <label style="display: block; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;">ALIGN HORIZONTAL</label>
         <div style="display: flex; gap: 0.5rem; width: 100%; margin-bottom: 0.5rem;">
@@ -180,6 +198,7 @@
     }
 </style>
 
+<script src="assets/js/mobile-nav.js" defer></script>
 <script src="assets/js/configurator_mobile.js"></script>
 </body>
 </html>

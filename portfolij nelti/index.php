@@ -5,11 +5,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Portfolio Sample - Premium Custom T-Shirts</title>
     <!-- Add SEO Meta Tags -->
     <meta name="description" content="Design and buy premium, neo-brutalist custom t-shirts. Portfolio Sample showcase.">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/mobile.css" media="(max-width: 768px)">
 </head>
 <body>
 
@@ -18,16 +19,23 @@
 <header>
     <div class="nav-container">
         <a href="index.php" class="logo" style="font-weight:900; font-size:1.5rem; text-decoration:none; color:var(--text-color); background:var(--accent-1); padding:0.3rem 0.8rem; border:var(--border-width) solid var(--border-color); box-shadow:4px 4px 0px var(--border-color);">PORTFOLIO SAMPLE</a>
-        <nav>
+        <nav id="site-nav" class="site-nav">
             <ul>
                 <li><a href="configurator.php">DESIGN</a></li>
                 <li><a href="contact.php">CONTACT</a></li>
                 <li><a href="admin.php">ADMIN</a></li>
             </ul>
         </nav>
-        <div class="cart-icon">
-            <span style="font-size: 2rem;">🛒</span>
-            <span class="cart-badge" id="cart-badge">0</span>
+        <div class="nav-actions">
+            <div class="cart-icon">
+                <span style="font-size: 2rem;">🛒</span>
+                <span class="cart-badge" id="cart-badge">0</span>
+            </div>
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Odpri meni">
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+            </button>
         </div>
     </div>
 </header>
@@ -46,7 +54,7 @@
     </section>
 
     <section class="how-it-works-section" style="padding: 6rem 2rem; border-bottom: var(--border-width) solid var(--border-color); background-color: var(--accent-1); background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px); background-size: 50px 50px;">
-        <div style="background-color: #fff; padding: 4rem; max-width: 800px; margin: 0 auto; border: var(--border-width) solid var(--border-color); box-shadow: var(--shadow);">
+        <div class="how-it-works-inner" style="background-color: #fff; padding: 4rem; max-width: 800px; margin: 0 auto; border: var(--border-width) solid var(--border-color); box-shadow: var(--shadow);">
             <h2 class="section-title" style="transform: none; margin-bottom: 2rem;">How It Works</h2>
             <ol style="font-size: 1.5rem; line-height: 2; padding-left: 2rem; font-weight: bold;">
                 <li>Select a base template from our premium cut blanks.</li>
@@ -139,6 +147,7 @@
 </footer>
 
 <div id="toast-container"></div>
-<script src="app.js"></script>
+    <script src="app.js"></script>
+    <script src="assets/js/mobile-nav.js" defer></script>
 </body>
 </html>

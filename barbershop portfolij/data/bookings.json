@@ -1,0 +1,22 @@
+[
+  {
+    "id": "18937d7a-f41d-4846-8a59-fea9fa4ff37c",
+    "customerName": "Luka Bodlaj",
+    "customerEmail": "bodlajluka@gmail.com",
+    "service": "Classic Haircut",
+    "date": "2026-04-29",
+    "time": "22:23",
+    "notes": "",
+    "createdAt": "2026-04-16T19:33:39.053Z"
+  },
+  {
+    "id": "db66c73b-5979-4006-9508-f67108d56acd",
+    "customerName": "Luka Bodlaj",
+    "customerEmail": "bodlajluka@gmail.com",
+    "service": "Classic Haircut",
+    "date": "2026-04-20",
+    "time": "13:00",
+    "notes": "",
+    "createdAt": "2026-04-16T19:59:31.177Z"
+  }
+]

@@ -84,10 +84,11 @@ unset($_SESSION['success_msg']);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin - Portfolio Sample</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/mobile.css" media="(max-width: 768px)">
 </head>
 <body style="background-color: <?php echo $isAuthenticated ? 'var(--bg-color)' : 'var(--accent-2)'; ?>;">
 <div class="portfolio-ribbon">PORTFOLIO SAMPLE</div>
@@ -123,15 +124,22 @@ unset($_SESSION['success_msg']);
     </div>
 <?php else: ?>
     <!-- Admin Dashboard -->
-    <header style="background: var(--text-color); color: #fff;">
+    <header class="admin-top-header" style="background: var(--text-color); color: #fff;">
         <div class="nav-container">
             <div class="logo" style="background: #fff; color: var(--text-color); font-weight:900; padding:0.3rem 0.8rem; border:var(--border-width) solid var(--border-color);">PORTFOLIO SYS</div>
-            <nav>
+            <nav id="site-nav" class="site-nav">
                 <ul>
                     <li><a href="index.php" style="color: #fff;">LIVE SITE</a></li>
                     <li><a href="admin.php?logout=1" style="color: var(--accent-2);">LOGOUT</a></li>
                 </ul>
             </nav>
+            <div class="nav-actions">
+                <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Odpri meni">
+                    <span class="nav-toggle-bar" aria-hidden="true"></span>
+                    <span class="nav-toggle-bar" aria-hidden="true"></span>
+                    <span class="nav-toggle-bar" aria-hidden="true"></span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -223,6 +231,7 @@ unset($_SESSION['success_msg']);
         </div>
     </footer>
     <script src="app.js"></script>
+    <script src="assets/js/mobile-nav.js" defer></script>
     <?php if (!empty($successMsg)): ?>
     <script>
         document.addEventListener('DOMContentLoaded', () => {

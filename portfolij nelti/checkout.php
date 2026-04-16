@@ -5,10 +5,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Checkout - Portfolio Sample</title>
     <meta name="description" content="Complete your order. Portfolio Sample showcase.">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="assets/css/mobile.css" media="(max-width: 768px)">
 </head>
 <body>
 
@@ -17,15 +18,22 @@
 <header>
     <div class="nav-container">
         <a href="index.php" class="logo" style="font-weight:900; font-size:1.5rem; text-decoration:none; color:var(--text-color); background:var(--accent-1); padding:0.3rem 0.8rem; border:var(--border-width) solid var(--border-color); box-shadow:4px 4px 0px var(--border-color);">PORTFOLIO SAMPLE</a>
-        <nav>
+        <nav id="site-nav" class="site-nav">
             <ul>
                 <li><a href="configurator.php">DESIGN</a></li>
                 <li><a href="index.php">SHOP</a></li>
             </ul>
         </nav>
-        <div class="cart-icon">
-            <span style="font-size: 2rem;">🛒</span>
-            <span class="cart-badge" id="cart-badge">0</span>
+        <div class="nav-actions">
+            <div class="cart-icon">
+                <span style="font-size: 2rem;">🛒</span>
+                <span class="cart-badge" id="cart-badge">0</span>
+            </div>
+            <button type="button" class="nav-toggle" id="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="Odpri meni">
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+                <span class="nav-toggle-bar" aria-hidden="true"></span>
+            </button>
         </div>
     </div>
 </header>
@@ -54,7 +62,7 @@
                     <input type="text" id="checkout-address" class="form-input" placeholder="123 Street, City" required>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label for="checkout-city">City</label>
                         <input type="text" id="checkout-city" class="form-input" placeholder="Ljubljana" required>
@@ -72,7 +80,7 @@
                     <input type="text" id="checkout-card" class="form-input" placeholder="4242 4242 4242 4242" maxlength="19" required>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-row-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
                         <label for="checkout-exp">Expiry</label>
                         <input type="text" id="checkout-exp" class="form-input" placeholder="MM/YY" maxlength="5" required>
@@ -128,6 +136,7 @@
 
 <div id="toast-container"></div>
 <script src="app.js"></script>
+<script src="assets/js/mobile-nav.js" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const cart = window.portfolioCart;
