@@ -9,6 +9,10 @@ export const PORTFOLIO_LINKS = [
     labelKey: 'portfolioVHCoaching' as const,
   },
   {
+    href: '/portfolio/avtohisa',
+    labelKey: 'portfolioAvtohisa' as const,
+  },
+  {
     href: '/batman/index.html',
     labelKey: 'portfolioBatman' as const,
   },
