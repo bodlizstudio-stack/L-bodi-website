@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: boliz-portfolio
-    runtime: docker
-    plan: free
-    autoDeploy: true
