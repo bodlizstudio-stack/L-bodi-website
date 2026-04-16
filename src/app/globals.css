@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #050505; /* Slightly darker for better contrast */
+    color: #e2e8f0;
+    @apply bg-obsidian text-slate-200 antialiased overflow-x-hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 50% -20%, #0c2115 0%, #050505 80%);
+  }
+}
+
+/* Global legibility improvements */
+.text-slate-400 {
+  color: #a1a1aa !important; /* Slightly brighter for better contrast on black */
+}
+
+.font-light {
+  font-weight: 350 !important;
+}
+
+/* Custom utility for the glassmorphic panels */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  
+  .glow-text {
+    text-shadow: 0 0 20px rgba(57, 255, 20, 0.5);
+  }
+
+  .glass-panel-glow {
+    @apply bg-white/5 backdrop-blur-xl border shadow-2xl;
+    border-color: rgba(57, 255, 20, 0.2);
+    box-shadow: 0 0 40px rgba(57, 255, 20, 0.08), inset 0 0 60px rgba(57, 255, 20, 0.02);
+    animation: border-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes border-pulse {
+    0%, 100% {
+      border-color: rgba(57, 255, 20, 0.25);
+      box-shadow: 0 0 40px rgba(57, 255, 20, 0.08), inset 0 0 60px rgba(57, 255, 20, 0.02);
+    }
+    50% {
+      border-color: rgba(57, 255, 20, 0.45);
+      box-shadow: 0 0 60px rgba(57, 255, 20, 0.15), inset 0 0 80px rgba(57, 255, 20, 0.04);
+    }
+  }
+
+  /* Zyra AI assistant */
+  .zyra-typing-dot {
+    animation: zyra-typing-bounce 0.6s ease-in-out infinite;
+  }
+  @keyframes zyra-typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+  .zyra-fab-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(57, 255, 20, 0.15) 0%, transparent 70%);
+    animation: zyra-fab-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes zyra-fab-pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
